@@ -6,8 +6,12 @@ output the calendar events in a markdown file as formatted markdown content.
 Should the tags be missing, then no action will be taken.
 
 The following flowchart illustrates the GitHub action workflow.
-<!-- Note: Linear layour of flowchart was preferred, but due to space considerations ... -->
-![Alt text](./actionFlowChart.svg)
+
+<div style="text-align: center;">
+
+![GitHub Action flowchart](./actionFlowChart.svg)
+
+</div>
 
 ## Getting started
 A minimal working example could look like the following,
