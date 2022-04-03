@@ -1,4 +1,4 @@
-name: Update TimeEdit schedule
+name: Update TimeEdit schedule events
 description: Pull TimeEdit schedules to GitHub w. GitHub Actions
 
 inputs:
@@ -6,12 +6,14 @@ inputs:
     description: URL to a TimeEdit site.
     required: true
   course-name:
-    description: Course name
+    description: Course name.
     required: true
   repo-name:
-    description: Repository name, current github context as default.
+    description: Repository name.
+    required: true
   repo-owner:
     description: Repository owner, current github context as default.
+    default: ${{ github.repository_owner }}
   repo-file:
     description: Repository file to update
     default: 'README.md'
