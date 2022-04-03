@@ -3,7 +3,7 @@
  * Author: Johan Edman, 2022
  */
 const helpers = require("./helper");
-const TimeEdit = require("simple-timeedit-api");
+const TimeEdit = require("./timeedit-api");
 const { DateTime } = require("luxon");
 
 const core = require('@actions/core');
