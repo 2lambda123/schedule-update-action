@@ -1,0 +1,36 @@
+name: Update TimeEdit schedule
+description: Pull TimeEdit schedules to GitHub w. GitHub Actions
+
+inputs:
+  timeedit-url:
+    description: URL to a TimeEdit site.
+    required: true
+  course-name:
+    description: Course name
+    required: true
+  repo-name:
+    description: Repository name, current github context as default.
+  repo-owner:
+    description: Repository owner, current github context as default.
+  repo-file:
+    description: Repository file to update
+    default: 'README.md'
+    required: true
+  token:
+    description: Token to interact with GitHub API
+    default: ${{ github.token }}
+    required: true
+  filter-empty:
+    description: Filter empty calendar events
+    default: true
+  use-kth-places: 
+    description: Use KTH Places to for locations.
+    default: false
+  
+runs:
+  using: node16
+  main: index.js
+
+branding:
+  icon: calendar
+  color: blue
