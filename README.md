@@ -6,8 +6,8 @@ output the calendar events in a markdown file as formatted markdown content.
 Should the tags be missing, then no action will be taken.
 
 
+#### Flowchart
 ![Alt text](./actionFlowChart.svg)
-<img src="./actionFlowChart.svg">
 
 ### Usage
 Place the following tags in the markdown file where the content should be inserted.
