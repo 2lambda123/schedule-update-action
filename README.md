@@ -38,6 +38,7 @@ jobs:
           filter-empty: true
           use-kth-places: true
 ```
+
 Then, place the following tags in the markdown file to indicate where the  
 content should be inserted.
 
