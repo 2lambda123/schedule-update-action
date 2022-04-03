@@ -14,18 +14,22 @@ const DYNAMIC_END_STRING = "<!-- end dynamic schedule content -->";
 
 async function runTask() {
     const taskParams = {
+        token: core.getInput('token'),
         baseURL: core.getInput('timeedit-url'),
         courseId: core.getInput('course-name'),
-        repoOwner: core.getInput('repo-owner') || github.context.repo.owner,
-        repoName: core.getInput('repo-name') || github.context.repo,
+        repoOwner: core.getInput('repo-owner'),
+        repoName: core.getInput('repo-name'),
         repoFile: core.getInput('repo-file'),
         filterEmpty: helpers.parseBoolean(core.getInput('filter-empty')),
         useKTHPlaces: helpers.parseBoolean(core.getInput('use-kth-places'))};
 
-    const octokit = github.getOctokit(token);
+    const octokit = github.getOctokit(taskParams.token);
 
     const content = await updateScheduleFile(taskParams, octokit);
-    await commitNewFile(taskParams, octokit, content);
+
+    if (content.doUpdate) {
+        await commitNewFile(taskParams, octokit, content);
+    }
 }
 
 /**
@@ -36,18 +40,23 @@ async function updateScheduleFile(taskParams, octokit) {
     try {
         const res = await octokit.request(`GET /repos/{owner}/{repo}/contents/{file}`, {
             owner: taskParams.repoOwner,
-            repo: taskParams.repoName
+            repo: taskParams.repoName,
+            file: taskParams.repoFile
         });
 
         const { path, sha, content, encoding } = res.data;
         const rawContent = Buffer.from(content, encoding).toString();
         const startIndex = rawContent.indexOf(DYNAMIC_START_STRING);
         const endIndex = rawContent.indexOf(DYNAMIC_END_STRING);
-        const updatedContent = `${(startIndex === -1 || endIndex === -1) ? rawContent : rawContent.slice(0, startIndex + DYNAMIC_START_STRING.length)}\n${await getNewContentSection()}\n${rawContent.slice(endIndex)}`
 
-        return { path: path, sha: sha, encoding: encoding, data: updatedContent};
+        if (startIndex === -1 || endIndex === -1) {
+            return { path: path, sha: sha, encoding: encoding, data: rawContent, doUpdate: false }
+        } else {
+            const newContent = `${rawContent.slice(0, startIndex + DYNAMIC_START_STRING.length)}\n${await getNewContentSection(taskParams)}\n${rawContent.slice(endIndex)}`;
+            return { path: path, sha: sha, encoding: encoding, data: newContent, doUpdate: true }
+        }
     } catch (error) {
-        throw new Error(`There was an error fetching the repository file.`, err);
+        throw new Error(`There was an error fetching the repository file.`, error);
     }
 }
 
@@ -56,9 +65,9 @@ async function updateScheduleFile(taskParams, octokit) {
  * Fetches the content from given TimeEdit
  * @returns markdown content
  */
-async function getNewContentSection() {
-    const timeEdit = new TimeEdit({ baseUrl: process.env.BASE_URL, filterEmpty: process.env.FILTER_EMPTY, useKTHPlaces: process.env.KTH_PLACES });
-    const courseEvents = await fetchCourseEvents(timeEdit, process.env.COURSE_NAME);
+async function getNewContentSection(taskParams) {
+    const timeEdit = new TimeEdit({ baseUrl: taskParams.baseURL, filterEmpty: taskParams.filterEmpty, useKTHPlaces: taskParams.filterEmpty });
+    const courseEvents = await fetchCourseEvents(timeEdit, taskParams.courseId);
     return helpers.formatAsMarkdown(courseEvents);
 }
 
@@ -85,10 +94,11 @@ async function fetchCourseEvents(timeEdit, courseName) {
  * @param {string} updatedContent Content to commit.
  */
 async function commitNewFile(taskParams, octokit, content) {
-    try {
+    try {              
         octokit.request(`PUT /repos/{owner}/{repo}/contents/{path}`, {
-            owner: taskParams.repoOwner,
             message: `Update ${content.path}`,
+            owner: taskParams.repoOwner,
+            repo: taskParams.repoName,
             content: Buffer.from(content.data, "utf-8").toString(content.encoding),
             path: content.path,
             sha: content.sha,
