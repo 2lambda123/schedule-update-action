@@ -52,8 +52,12 @@ async function updateScheduleFile(taskParams, octokit) {
         if (startIndex === -1 || endIndex === -1) {
             return { path: path, sha: sha, encoding: encoding, data: rawContent, doUpdate: false }
         } else {
+            let shouldUpdate = true;
             const newContent = `${rawContent.slice(0, startIndex + DYNAMIC_START_STRING.length)}\n${await getNewContentSection(taskParams)}\n${rawContent.slice(endIndex)}`;
-            return { path: path, sha: sha, encoding: encoding, data: newContent, doUpdate: true }
+            if (newContent == rawContent) {
+                shouldUpdate = false;
+            }
+            return { path: path, sha: sha, encoding: encoding, data: newContent, doUpdate: shouldUpdate }
         }
     } catch (error) {
         throw new Error(`There was an error fetching the repository file.`, error);
