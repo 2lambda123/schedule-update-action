@@ -27,7 +27,16 @@ jobs:
   fetch-timeedit-events:
     runs-on: ubuntu-latest    
     steps:     
-      - name: Update schedule Action
+      - name: Fetch TimeEdit schedule
+      uses: EdmanJohan/schedule-update-action@master
+      with:
+        timeedit-url: https://cloud.timeedit.net/
+        course-name: YOUR_COURSE_NAME
+        repo-name: YOUR_REPO_NAME
+        repo-owner: YOUR_REPO_OWNER
+        repo-file: YOUR_REPO_FILE
+        filter-empty: true
+        use-kth-places: false
         uses: EdmanJohan/schedule-update-action@master
         with:
           timeedit-url: https://cloud.timeedit.net/kth/web/public01/
